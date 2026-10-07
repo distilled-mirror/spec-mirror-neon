@@ -13690,7 +13690,7 @@
             "type": "boolean"
           },
           "authentication_method": {
-            "description": "Authentication method configured for this role: `password`, `oauth`, or `no_login`.\n",
+            "description": "Authentication method configured for this role: `password`, `oauth`, `oidc`, or `no_login`.\n",
             "type": "string",
             "example": "password"
           },
@@ -18278,7 +18278,7 @@
           "zip": {
             "type": "string",
             "format": "binary",
-            "description": "Optional ZIP archive of the function source code. Omit to reuse the\nlatest version's bundle (a config-only change). Required for the\nfirst deployment of a function.\n"
+            "description": "Optional ZIP archive of the function source code. Omit to reuse the\nlatest version's bundle (a config-only change). Required for the\nfirst deployment of a function.\n\nPlace `index.mjs` or `index.js` at the archive root, without a\ncontaining directory. If both exist, `index.mjs` is loaded. Export a\nrequest handler function or an object with a `fetch` method. Use\n`export default` for ESM or `module.exports` for CommonJS; prefer\n`index.mjs` for ESM.\n\nUpload JavaScript ready to run on Node.js 24. Compile TypeScript\nbefore uploading. Bundle dependencies into the entry module, or\ninclude the required modules and assets in the archive with their\nrelative paths preserved (including `node_modules` for external\npackages). Node.js built-in modules do not need to be bundled.\nThe API does not transpile, bundle, or install dependencies.\nThe ZIP is limited to 32 MiB compressed and 128 MiB extracted, with\nat most 32,768 entries and 64 MiB per file. Bundle large dependency\ntrees to keep the archive small. ZIPs larger than 32 MiB are rejected\nwith HTTP 413 before creating a deployment. The extracted-size,\nentry-count, and per-file limits are enforced during the asynchronous\nbuild; an accepted upload that exceeds them fails the build.\n\nFor example, a self-contained ESM bundle needs only `index.mjs`\nat the ZIP root. The Neon CLI bundles source into this layout by\ndefault; `neon function deploy --no-bundle` packages a prebuilt\ndirectory or an entry file named `index.mjs` or `index.js`.\n"
           },
           "runtime": {
             "type": "string",
