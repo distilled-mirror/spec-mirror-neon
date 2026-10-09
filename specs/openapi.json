@@ -15077,6 +15077,11 @@
             },
             "nullable": true,
             "description": "List of available database schemas (SubZero only)"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When `settings` and `available_schemas` were read from the database. While the\ncompute is suspended they are served from that read, so a change made directly in\nthe database since then shows up in the first response served while the compute is\nactive.\n"
           }
         }
       },
