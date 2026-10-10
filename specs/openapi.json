@@ -98,6 +98,10 @@
       "description": "These methods allow you to create and manage functions on your Neon branches."
     },
     {
+      "name": "Realtime",
+      "description": "These methods allow you to enable and manage Realtime on your branches."
+    },
+    {
       "name": "AI Gateway",
       "description": "These methods allow you to inspect the AI Gateway endpoint for your Neon branches."
     },
@@ -5498,6 +5502,194 @@
                 }
               }
             }
+          },
+          "default": {
+            "$ref": "#/components/responses/GeneralError"
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/branches/{branch_id}/realtime": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "description": "The project ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        },
+        {
+          "name": "branch_id",
+          "in": "path",
+          "description": "The branch ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieve Realtime state",
+        "description": "Retrieves whether Realtime is enabled for the branch, whether a change is still being applied,\nand, once provisioned, its invocation URL and allowed origins. The shared secret is returned by\n`GET /projects/{project_id}/branches/{branch_id}/realtime/secret`.\n",
+        "tags": [
+          "Realtime"
+        ],
+        "x-stability-level": "beta",
+        "operationId": "getProjectBranchRealtime",
+        "responses": {
+          "200": {
+            "description": "Realtime state of the branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Realtime"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/GeneralError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Enable Realtime",
+        "description": "Enables Realtime for the branch, or applies new options to an enabled branch. Provisioning is\nasynchronous; poll the Realtime state until it is no longer pending.\n",
+        "tags": [
+          "Realtime"
+        ],
+        "x-stability-level": "beta",
+        "operationId": "enableProjectBranchRealtime",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RealtimeOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Realtime provisioning is queued"
+          },
+          "default": {
+            "$ref": "#/components/responses/GeneralError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Disable Realtime",
+        "description": "Disables Realtime for the branch and discards its shared secret. Deprovisioning is asynchronous.",
+        "tags": [
+          "Realtime"
+        ],
+        "x-stability-level": "beta",
+        "operationId": "disableProjectBranchRealtime",
+        "responses": {
+          "202": {
+            "description": "Realtime deprovisioning is queued"
+          },
+          "default": {
+            "$ref": "#/components/responses/GeneralError"
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/branches/{branch_id}/realtime/secret": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "description": "The project ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        },
+        {
+          "name": "branch_id",
+          "in": "path",
+          "description": "The branch ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieve the Realtime shared secret",
+        "description": "Retrieves the secret the application backend issues Realtime tokens with. Requires permission to\nread the project's credentials. Returns 404 while Realtime is disabled or before the secret is\nprovisioned. After a rotation, this returns the previous secret until `pending` is false.\n",
+        "tags": [
+          "Realtime"
+        ],
+        "x-stability-level": "beta",
+        "operationId": "getProjectBranchRealtimeSecret",
+        "responses": {
+          "200": {
+            "description": "The branch's Realtime shared secret",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevents caches from storing the shared secret.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeSecret"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/GeneralError"
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/branches/{branch_id}/realtime/rotate_secret": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "description": "The project ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        },
+        {
+          "name": "branch_id",
+          "in": "path",
+          "description": "The branch ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,60}$"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Rotate the Realtime shared secret",
+        "description": "Replaces the branch's Realtime shared secret. Rotation is asynchronous: once the Realtime state is\nno longer pending, the previous secret stops working and\n`GET /projects/{project_id}/branches/{branch_id}/realtime/secret` returns the new one.\n",
+        "tags": [
+          "Realtime"
+        ],
+        "x-stability-level": "beta",
+        "operationId": "rotateProjectBranchRealtimeSecret",
+        "responses": {
+          "202": {
+            "description": "Realtime secret rotation is queued"
           },
           "default": {
             "$ref": "#/components/responses/GeneralError"
@@ -11447,6 +11639,10 @@
                 "minLength": 1,
                 "maxLength": 256
               },
+              "realtime": {
+                "description": "Enable Realtime for the default branch with these options.",
+                "$ref": "#/components/schemas/RealtimeOptions"
+              },
               "branch": {
                 "type": "object",
                 "description": "Configuration for the initial branch created with the project.",
@@ -12692,6 +12888,10 @@
                 "type": "boolean",
                 "default": false
               },
+              "realtime": {
+                "description": "Enable Realtime for the branch with these options. A child of a Realtime branch is enabled\neven when this is omitted.\n",
+                "$ref": "#/components/schemas/RealtimeOptions"
+              },
               "archived": {
                 "description": "Whether to create the branch in the archived state. When omitted, the branch is created as a normal (non-archived) branch.\n",
                 "type": "boolean"
@@ -13662,6 +13862,75 @@
           }
         }
       },
+      "RealtimeOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "allowed_origins": {
+            "description": "The browser origins allowed to connect, each `http` or `https` with a host and optional port\nand no path. An empty list, or `*` alone, allows any origin. Omitted keeps the current or\ninherited value.\n",
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048,
+              "pattern": "^(\\*|https?://[^/?#@,*\\s]+)$"
+            }
+          }
+        }
+      },
+      "Realtime": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "pending"
+        ],
+        "properties": {
+          "enabled": {
+            "description": "Whether Realtime is enabled for the branch.",
+            "type": "boolean"
+          },
+          "pending": {
+            "description": "Whether a provisioning, settings, rotation or deprovisioning change is still being applied.",
+            "type": "boolean"
+          },
+          "invocation_url": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "allowed_origins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RealtimeSecret": {
+        "type": "object",
+        "x-sensitive": [
+          "secret"
+        ],
+        "required": [
+          "secret",
+          "pending"
+        ],
+        "properties": {
+          "secret": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The key the application backend issues Realtime tokens with, `nrt_live_1` followed by the unpadded base64url 32-byte AES-256-GCM key."
+          },
+          "pending": {
+            "description": "Whether a change is still being applied. After a rotation, the secret changes when this becomes false.",
+            "type": "boolean"
+          }
+        }
+      },
       "Role": {
         "type": "object",
         "required": [
@@ -14010,6 +14279,7 @@
           "aws_marketplace",
           "free_v2",
           "free_v3",
+          "build",
           "launch",
           "launch_v3",
           "scale",
